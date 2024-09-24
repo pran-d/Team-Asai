@@ -278,12 +278,12 @@ void Extension_Control(float vRef, float stop, float Kp, float Kd){
 void Flexion_Damping(float max_flexion, float Kp, float Kd){
   
   //Need to add some sort of while loop here, earlier we were using while(serial.available)
-  if(-angleY < 20){
+  if(-angleX < 20){
       t_in = 0;
       kp_in = 0;
       kd_in = 0;
     }
-  if(-angleY>max_flexion){
+  if(-angleX>max_flexion){
       kp_in = Kp; kd_in = Kd; 
       t_in = 
       p_in = p_out-0.25;
