@@ -26,8 +26,14 @@ void setup() {
 
 void loop() {
 
+  // MOTOR CONTROLLER TESTING HERE
+  // Position_Control(0.5, 5, 2);
+  // Flexion_Damping(40, 5, 2);
+  Extension_Control(-10, 130, 0, 5);
+
+
+  /*
   // Supervisory FSM - decides which mode to be in
-  
   int mode;
   switch(currentMode)
   {
@@ -102,5 +108,6 @@ void loop() {
         }
     break;
   }
+  */
 
 }
