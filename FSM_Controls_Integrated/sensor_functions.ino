@@ -49,12 +49,13 @@ void IMU_initialize(){
     // mpu.CalibrateAccel(15);
     // mpu.CalibrateGyro(15);
     // mpu.PrintActiveOffsets();
-    mpu.setXAccelOffset(youroffset[0]);
-    mpu.setYAccelOffset(youroffset[1]);
-    mpu.setZAccelOffset(youroffset[2]);
-    mpu.setXGyroOffset(youroffset[3]);
-    mpu.setYGyroOffset(youroffset[4]);
-    mpu.setZGyroOffset(youroffset[5]);
+    mpu.setXAccelOffset(mpuOffsets[0]);
+    mpu.setYAccelOffset(mpuOffsets[1]);
+    mpu.setZAccelOffset(mpuOffsets[2]);
+    mpu.setXGyroOffset(mpuOffsets[3]);
+    mpu.setYGyroOffset(mpuOffsets[4]);
+    mpu.setZGyroOffset(mpuOffsets[5]);
+    
     mpu.setDMPEnabled(true);
     Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
     int mpuIntStatus = mpu.getIntStatus();
@@ -81,10 +82,11 @@ void IMU_update(){
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
       mpu.dmpGetGyro(&av, fifoBuffer); 
   }
-  angleX=ypr[2] * 180/M_PI;
+  angleX=ypr[2] * 180/M_PI -90;
   angleY=ypr[1] * 180/M_PI;
-  dataToSend.thighAngle= angleX;
-  dataToSend.kneeAngle= angleX-dataToSend.shankAngle;
+  sensors.thighAngle= angleX-90;
+  sensors.kneeAngle= angleX-sensors.shankAngle;
+  // Serial.println(angleX);
 }
 
 

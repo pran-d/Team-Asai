@@ -19,6 +19,7 @@ void CAN_receive(){
   twai_message_t message_recv;
   while (twai_receive(&message_recv, 0) == ESP_OK) {  // what is this tick thing - SOME UNIT OF TIME IN RTOS
     lastMessageTime = millis();
+    
     handle_rx_message(message_recv);
   }
   if(millis()-lastMessageTime > 500){
@@ -214,25 +215,26 @@ void unpack_espCan(uint8_t* data){
     shankAngle -= 65535;
   }
 
-  dataToSend.shankAngle= shankAngle/100.0;
-  dataToSend.time= time;
-  dataToSend.gaitphase= gaitphase;
+  sensors.shankAngle= shankAngle/100.0;
+  sensors.time= time;
+  sensors.gaitphase= gaitphase;
   
-  Serial.println(gaitphase);
-  Serial.println(dataToSend.shankAngle);
-  Serial.println();
+  // Serial.println(gaitphase);
+  // Serial.println(data.shankAngle);
+  // Serial.println();
 }
 
 void unpack_fsrVal(uint8_t* data)
 {
-  dataToSend.fsr1 = (data[1] << 8) | data[0];
-  dataToSend.fsr2 = (data[3] << 8) | data[2];
-  dataToSend.fsr3 = (data[5] << 8) | data[4];
-  dataToSend.fsr4 = (data[7] << 8) | data[6];
-  Serial.println(dataToSend.fsr1);
+  sensors.fsr1 = (data[1] << 8) | data[0];
+  sensors.fsr2 = (data[3] << 8) | data[2];
+  sensors.fsr3 = (data[5] << 8) | data[4];
+  sensors.fsr4 = (data[7] << 8) | data[6];
+  Serial.println(sensors.fsr1);
 }
 
 
+//---------------------------------Controllers-------------------------------
 void Extension_Control(float vRef, float stop, float Kp, float Kd){
   float v_max = vRef;
   // constant velocity at the time being, but with gradual increase and gradual decrease
@@ -278,12 +280,12 @@ void Extension_Control(float vRef, float stop, float Kp, float Kd){
 void Flexion_Damping(float max_flexion, float Kp, float Kd){
   
   //Need to add some sort of while loop here, earlier we were using while(serial.available)
-  if(-angleY < 20){
+  if(-angleX < 20){
       t_in = 0;
       kp_in = 0;
       kd_in = 0;
     }
-  if(-angleY>max_flexion){
+  if(-angleX>max_flexion){
       kp_in = Kp; kd_in = Kd; 
       t_in = 
       p_in = p_out-0.25;
@@ -302,22 +304,4 @@ void Position_Control(float pRef, float Kp, float Kd){
 void Reset_Torque(){
   t_in = 0;
   // Do we need a do_each_loop here??
-}
-
-void CalibrateDeadband(){
-  kp_in = 0;
-  kd_in = 5;
-  v_in = -4;
-  t_in = 0;
-  deadband_length = 0.4 //NEEDS TO BE CALIBRATED
-
-  deadband_torque_limit = 0.5; //when tout goes above this threshold we are no longer in deadband 
-
-  while(tout<deadband_flexion_limit){
-    do_each_loop('Deadband Flexion Limit')
-  }
-  deadband_extension = p_out
-  deadband_flexion = p_out - deadband_length 
-
-
 }

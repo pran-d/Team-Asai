@@ -23,17 +23,59 @@ void setup() {
 }
 
 
+void loop(){
 
-void loop() {
+  //Extension_Control(-10, 130, 0, 5);
 
-  // MOTOR CONTROLLER TESTING HERE
-  // Position_Control(0.5, 5, 2);
-  // Flexion_Damping(40, 5, 2);
-  Extension_Control(-10, 130, 0, 5);
+  twai_message_t message_recv;
+  while (twai_receive(&message_recv, 0) == ESP_OK) { 
+    // timeRecv = millis();
+    handle_rx_message(message_recv);
+    
+  //Serial.print("Gait phase: ");
+  IMU_update();
+  Serial.print(sensors.time);Serial.print(",");
+  Serial.print(sensors.gaitphase);Serial.print(",");
+  Serial.print(sensors.fsr1);Serial.print(",");
+  Serial.print(sensors.fsr2);Serial.print(",");
+  Serial.print(sensors.fsr3);Serial.print(",");
+  Serial.print(sensors.fsr4);Serial.print(",");
+  //Serial.print("   shank angle: "); 
+  Serial.print(sensors.kneeAngle);Serial.print(",");
+  Serial.print(sensors.thighAngle);Serial.print(",");  
+  Serial.println(sensors.shankAngle);
+  //Serial.print("   knee angle: "); 
+  
+  }
+
+  // currentMode=Stair;
+  // currentState=Walking;
+
+  // while (currentMode==Stair)
+  //   {
+  //     IMU_update();
+  //     CAN_receive();
+  //     Serial.println(sensors.fsr1);
+  //     switch (currentState) {
+
+  //       case Walking:
+  //       WalkingStateMachine();
+  //       break;
+    
+  //       case Ascent:
+  //       AscentStateMachine();
+  //       break;
+
+  //       case Descent:
+  //       DescentStateMachine();
+  //       break;
+  //     }
+  //   }
 
 
-  /*
   // Supervisory FSM - decides which mode to be in
+  
+  /*
   int mode;
   switch(currentMode)
   {

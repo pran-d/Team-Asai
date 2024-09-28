@@ -30,7 +30,8 @@ float angleX = 0;
 float angleY = 0;
 float alpha = 0.02;  // Complementary filter constant
 unsigned long previousTime, currentTime, startTime, lastMessageTime;
-int youroffset[6] = {681, -3, 741, -283, -184, -144};
+int mpuOffsets[6] = {-935,	-1062, 626, 82,	-6, -10};
+
 
 #define RX_PIN 18
 #define TX_PIN 19
