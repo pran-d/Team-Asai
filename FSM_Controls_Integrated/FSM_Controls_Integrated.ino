@@ -27,50 +27,34 @@ void loop(){
 
   //Extension_Control(-10, 130, 0, 5);
 
-  twai_message_t message_recv;
-  while (twai_receive(&message_recv, 0) == ESP_OK) { 
-    // timeRecv = millis();
-    handle_rx_message(message_recv);
+  // IMU_update();
+  // float pRef = get_motor_position_from_leg_position(angleX)/(33);
+  // Serial.print(angleX); Serial.print(",");
+  // Serial.println(pRef);
+  // Position_Control(pRef, 6, 2, 0.4);
+
+
+  while (currentMode==Stair)
+    {
+      IMU_update();
+      CAN_receive();
+      // Serial.print(sensors.thighAngle); Serial.print(",");
+      // Serial.println(sensors.fsr1);
+      switch (currentState) {
+
+        case Walking:
+        WalkingStateMachine();
+        break;
     
-  //Serial.print("Gait phase: ");
-  IMU_update();
-  Serial.print(sensors.time);Serial.print(",");
-  Serial.print(sensors.gaitphase);Serial.print(",");
-  Serial.print(sensors.fsr1);Serial.print(",");
-  Serial.print(sensors.fsr2);Serial.print(",");
-  Serial.print(sensors.fsr3);Serial.print(",");
-  Serial.print(sensors.fsr4);Serial.print(",");
-  //Serial.print("   shank angle: "); 
-  Serial.print(sensors.kneeAngle);Serial.print(",");
-  Serial.print(sensors.thighAngle);Serial.print(",");  
-  Serial.println(sensors.shankAngle);
-  //Serial.print("   knee angle: "); 
-  
-  }
+        case Ascent:
+        AscentStateMachine();
+        break;
 
-  // currentMode=Stair;
-  // currentState=Walking;
-
-  // while (currentMode==Stair)
-  //   {
-  //     IMU_update();
-  //     CAN_receive();
-  //     Serial.println(sensors.fsr1);
-  //     switch (currentState) {
-
-  //       case Walking:
-  //       WalkingStateMachine();
-  //       break;
-    
-  //       case Ascent:
-  //       AscentStateMachine();
-  //       break;
-
-  //       case Descent:
-  //       DescentStateMachine();
-  //       break;
-  //     }
-  //   }
+        case Descent:
+        DescentStateMachine();
+        break;
+      }
+    }
 
 
   // Supervisory FSM - decides which mode to be in

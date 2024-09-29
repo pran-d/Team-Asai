@@ -86,7 +86,7 @@ States currentState = Walking;
 enum Phases {Standing, HS, MS, TO, Sw, TS};
 Phases currentPhase = Standing;
 enum Modes {Passive, Stair, Flexion};
-Modes currentMode = Passive;
+Modes currentMode = Stair;
 
 float theta_t; // Thigh angle
 float theta_k; // Knee angle

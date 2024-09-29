@@ -82,11 +82,11 @@ void IMU_update(){
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
       mpu.dmpGetGyro(&av, fifoBuffer); 
   }
-  angleX=ypr[2] * 180/M_PI -90;
+  angleX=ypr[2] * 180/M_PI-100;
   angleY=ypr[1] * 180/M_PI;
-  sensors.thighAngle= angleX-90;
+  sensors.thighAngle= angleX;
   sensors.kneeAngle= angleX-sensors.shankAngle;
-  // Serial.println(angleX);
+  Serial.println(sensors.thighAngle);
 }
 
 

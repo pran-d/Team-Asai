@@ -14,37 +14,56 @@ int readMode(){
 // }
 
 void WalkingStateMachine() {
+  // Serial.println("Entered Walking State");
+  FSRs=sensors.gaitphase;
+  
   switch (currentPhase) {
     case HS:
-      if (FSRs == MS && theta_t <= 5 && theta_k <= 5 && w1 < GRF && GRF < w2) 
-      currentPhase = Standing;  //T20      
-      else if (FSRs == Sw) 
-      currentPhase = Sw; //T21
+      if (FSRs == MS && theta_t <= 5 && theta_k <= 5 && w1 < GRF && GRF < w2)
+      {
+      currentPhase = Standing; Serial.println("HS -> Standing"); //T20  
+      }
+      else if (FSRs == Sw){ 
+      currentPhase = Sw; Serial.println("HS -> SW"); //T21
+      }
       break;
 
     case Standing:
-      if (FSRs == Sw) currentPhase = Sw; //T01
-      else if (GRF > bw && theta_k <=5 && FSRs == MS) currentPhase = TO; // T03
+      Serial.println("In Standing");
+      if (FSRs == Sw) {
+        currentPhase = Sw; Serial.println("Standing -> SW");} //T01
+      else if (GRF > bw && theta_k <=5 && FSRs == MS){
+        currentPhase = TO; Serial.println("Standing -> TO"); // T03
+      } 
       break;
     
     case MS:
-      if (w1 < GRF && GRF < w2 && theta_k <= 5 && theta_t <= 5 && FSRs== MS) currentPhase = Standing; // T30
-      else if (FSRs == TO && theta_t < 0) currentPhase = TO; // T34
+      if (w1 < GRF && GRF < w2 && theta_k <= 5 && theta_t <= 5 && FSRs== MS){
+         currentPhase = Standing; Serial.println("MS -> Standing"); // T30
+      }
+      else if (FSRs == TO && theta_t < 0){
+        currentPhase = TO; Serial.println("MS -> TO"); // T34
+      }
       break;
 
     case TO:
-      if (FSRs == Sw) currentPhase = Sw; // T41
+      if (FSRs == Sw) currentPhase = Sw; Serial.println("TO -> SW"); // T41
       break;
 
     case Sw:
-      if (FSRs == HS && theta_k < 5 && theta_t < theta2 && theta1 < theta_t ) currentPhase = HS; // T12
+    Serial.println("In Swing");
+      if (FSRs == HS /*&& theta_k < 5 */&& sensors.thighAngle < 30 ){ 
+        currentPhase = HS; Serial.println("SW -> HS"); // T12
+      }
       else if (theta_k <= 5 && FSRs == HS && w1 < GRF && GRF < w2)
       {
         currentPhase = HS; currentState = Descent; // Walking to Descent
+        Serial.println("SW -> HS and Walking -> Stair Descent");
       }
-      else if (FSRs == HS && theta_k >theta3)
+      else if (FSRs == MS && sensors.thighAngle > 40)
       {
-        currentPhase = HS; currentState = Ascent; // Walking to Ascent
+        Serial.println("SW -> MS and Walking -> Stair Ascent");        
+        currentPhase = MS; currentState = Ascent; // Walking to Ascent
       }
       break;
   }
@@ -62,6 +81,7 @@ void AscentStateMachine() {
       break;
 
     case HS:
+    Serial.println("Ascent - Heel Strike");
       if (FSRs == MS && GRF > w3 && theta_k > theta3){
         Serial.println("Extend knee");
         currentPhase = MS;
@@ -73,6 +93,9 @@ void AscentStateMachine() {
       break;
 
     case MS:
+    while(sensors.thighAngle > 5){
+      Extension_Control(-12, 15, 0, 5);
+    }
     if(thighAngleDecrease()==true||shankAngleDecrease()==true||theta_k <10)
     {
       Serial.println("Flexion Damping");
