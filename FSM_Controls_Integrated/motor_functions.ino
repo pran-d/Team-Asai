@@ -25,6 +25,8 @@ void CAN_receive(){
   if(millis()-lastMessageTime > 500){
     Serial.println("Failed to receive data");
   }
+
+  GRF_FSRs();
 }
 
 void CAN_initialize(){
@@ -308,6 +310,19 @@ void Reset_Torque(){
   // Do we need a do_each_loop here??
 }
 
+void Stair_Ascent_Loading(){
+  float max_GRF = 1000;
+  float max_Torque = 1.5;
+
+  Feedforward_torque(GRF/max_GRF*max_Torque);
+  
+}
+
+void Feedforward_torque(float torque){
+  t_in = torque;
+  do_each_loop('Feedforward Torque');
+}
+
 
 
 
@@ -330,7 +345,7 @@ float FSR_Torque_Lookup_Output[62]{
 };
 
 
-//Inputs is Thigh Angle, assuming Link AB is grounded
+// Inputs is Thigh Angle, assuming Link AB is grounded
 float ThighAngle_MotorPosition_Lookup_Input[299]{
   104.89, 103.56, 102.17, 100.7, 99.13, 97.44, 95.58, 93.49, 91.01, 87.69, 87.02, 86.34, 85.66, 84.96, 84.24, 83.52, 
   82.78, 82.03, 81.26, 80.47, 79.66, 78.83, 77.97, 77.08, 76.16, 75.19, 74.18, 73.1, 71.95, 70.7, 69.31, 67.7, 65.68, 
@@ -352,7 +367,7 @@ float ThighAngle_MotorPosition_Lookup_Input[299]{
   16.84, 16.76, 16.67, 16.59, 16.51, 16.42, 16.34, 16.26, 16.17, 16.09, 16.01
 };
 
-//Output is the change in ext cable length, given that it was initially taut
+// Output is the change in ext cable length, given that it was initially taut
 float ThighAngle_MotorPosition_Lookup_Output[299]{
   77.53, 77.74, 77.92, 78.06, 78.15, 78.18, 78.13, 77.97, 77.64, 76.97, 76.80, 76.62, 76.42, 76.21, 75.98, 75.74, 75.48, 
   75.20, 74.90, 74.57, 74.23, 73.85, 73.45, 73.01, 72.54, 72.02, 71.45, 70.82, 70.12, 69.32, 68.39, 67.25, 65.73, 62.72, 

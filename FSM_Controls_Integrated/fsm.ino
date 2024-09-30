@@ -93,6 +93,7 @@ void AscentStateMachine() {
       break;
 
     case MS:
+    
     while(sensors.thighAngle > 5){
       Extension_Control(-12, 15, 0, 5);
     }
