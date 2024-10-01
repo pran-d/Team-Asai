@@ -93,9 +93,11 @@ void AscentStateMachine() {
       break;
 
     case MS:
-    
+
     while(sensors.thighAngle > 5){
-      Extension_Control(-12, 15, 0, 5);
+      // Add Extension Safety Checks here
+      // Extension_Control(-12, 15, 0, 5);
+      Serial.print("Start Climbing");
     }
     if(thighAngleDecrease()==true||shankAngleDecrease()==true||theta_k <10)
     {

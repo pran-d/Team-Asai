@@ -34,6 +34,9 @@ float angleZ = 0;
 float alpha = 0.02;  // Complementary filter constant
 unsigned long previousTime, currentTime, startTime, lastMessageTime;
 
+float GRF;     // Ground Reaction Force
+float GRF_Scale = 1; //Scaling between GRF Sum and User Bodyweight
+
 #define RX_PIN 18
 #define TX_PIN 19
 #define TRANSMIT_RATE_MS 100

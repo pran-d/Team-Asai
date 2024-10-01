@@ -5,6 +5,15 @@ void do_each_loop(char fromWhere) {
 
   IMU_update();  
   CAN_receive();
+
+  if (t_out > I_MAX && v_out > V_MAX){
+    ERROR_STATE = 1;
+    currentMode = Passive;
+  }
+  else{
+    ERROR_STATE = 0;
+  }
+
   pack_cmd();
 
   if (counter == 10) {
@@ -238,63 +247,71 @@ void unpack_fsrVal(uint8_t* data)
 
 //---------------------------------Controllers-------------------------------
 void Extension_Control(float vRef, float stop, float Kp, float Kd){
-  float v_max = vRef;
-  // constant velocity at the time being, but with gradual increase and gradual decrease
-  t_in = 0;            
-  float start_angle = angleX;
-  v_in = 0;
-  kp_in = Kp;
-  kd_in = Kd;
-  float margin = 15;
-  float total_rotation = angleX-stop;
-  float rise_angle = total_rotation/3;
+  if(!ERROR_STATE){
+    float v_max = vRef;
+    // constant velocity at the time being, but with gradual increase and gradual decrease
+    t_in = 0;            
+    float start_angle = angleX;
+    v_in = 0;
+    kp_in = Kp;
+    kd_in = Kd;
+    float margin = 15;
+    float total_rotation = angleX-stop;
+    float rise_angle = total_rotation/3;
 
-  float angle_rotated = start_angle - angleX;
+    float angle_rotated = start_angle - angleX;
+        
+    t_in= constrain(0.15*(v_in-v_out), -3, 3);
+
+    if (angle_rotated < rise_angle) {
+        // Acceleration phase
+      v_in = -5 + ((v_max + 5) / rise_angle) * angle_rotated;
+    } else if (angle_rotated < (2*rise_angle)) {
+        // Constant velocity phase
+        v_in = v_max;
+    } else if (angle_rotated < 3*rise_angle) {
+        // Deceleration phase
+        float angle_since_decel_start = angle_rotated - 2*rise_angle;
+        v_in = v_max * (1 - angle_since_decel_start / rise_angle);
+
+    } else {
+      Serial.println("Reached End of Motion");
+        // End of motion
+        v_in = 0;
+        t_in = 0;
       
-  t_in= constrain(0.15*(v_in-v_out), -3, 3);
+    }
 
-  if (angle_rotated < rise_angle) {
-      // Acceleration phase
-    v_in = -5 + ((v_max + 5) / rise_angle) * angle_rotated;
-  } else if (angle_rotated < (2*rise_angle)) {
-      // Constant velocity phase
-      v_in = v_max;
-  } else if (angle_rotated < 3*rise_angle) {
-      // Deceleration phase
-      float angle_since_decel_start = angle_rotated - 2*rise_angle;
-      v_in = v_max * (1 - angle_since_decel_start / rise_angle);
-
-  } else {
-    Serial.println("Reached End of Motion");
-      // End of motion
+    if (sensors.thighAngle < stop) {
       v_in = 0;
       t_in = 0;
-    
-  }
+      
+    }
+    do_each_loop('Extension Control'); 
 
-  if (sensors.thighAngle < stop) {
-    v_in = 0;
-    t_in = 0;
-    
   }
-  do_each_loop('Extension Control'); 
+  
   
 }
 
 void Flexion_Damping(float max_flexion, float Kp, float Kd){
+
+  if(!ERROR_STATE){
+    if(-angleX < 20){
+        t_in = 0;
+        kp_in = 0;
+        kd_in = 0;
+      }
+
+    if(-angleX>max_flexion){
+        kp_in = Kp; kd_in = Kd; 
+        t_in = 
+        p_in = p_out-0.25;
+      }
+    do_each_loop('Flexion Damping');
+  }
   
-  //Need to add some sort of while loop here, earlier we were using while(serial.available)
-  if(-angleX < 20){
-      t_in = 0;
-      kp_in = 0;
-      kd_in = 0;
-    }
-  if(-angleX>max_flexion){
-      kp_in = Kp; kd_in = Kd; 
-      t_in = 
-      p_in = p_out-0.25;
-    }
-    do_each_loop('Flexion Damping'); 
+   
 }
 
 void Position_Control(float pRef, float Kp, float Kd, float feedforward){

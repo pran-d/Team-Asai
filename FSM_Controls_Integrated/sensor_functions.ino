@@ -24,7 +24,7 @@ void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 void GRF_FSRs(){
-  GRF=sensors.fsr1+sensors.fsr2+sensors.fsr3+sensors.fsr4;
+  GRF=GRF_Scale*(sensors.fsr1+sensors.fsr2+sensors.fsr3+sensors.fsr4);
 }
 
 
