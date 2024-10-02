@@ -35,7 +35,7 @@ void CAN_receive(){
     Serial.println("Failed to receive data");
   }
 
-  GRF_FSRs();
+  
 }
 
 void CAN_initialize(){
@@ -328,16 +328,23 @@ void Reset_Torque(){
 }
 
 void Stair_Ascent_Loading(){
-  float max_GRF = 1000;
-  float max_Torque = 1.5;
-
-  Feedforward_torque(GRF/max_GRF*max_Torque);
+  
+  CAN_receive();
+  GRF_FSRs();
+  if (GRF > 60){
+    float max_GRF = 200;
+    float max_Torque = 2.5;
+    float feedforwardTorque = constrain(GRF/max_GRF*max_Torque, 0, max_Torque);
+    Serial.print("FeedforwardTorq: ");
+    Serial.println(feedforwardTorque);
+    Feedforward_torque(feedforwardTorque);
+  }
   
 }
 
 void Feedforward_torque(float torque){
   t_in = torque;
-  do_each_loop('Feedforward Torque');
+  do_each_loop('Feedforward Torque'); 
 }
 
 
