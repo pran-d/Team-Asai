@@ -182,13 +182,12 @@ void loop() {
       case '7':  // Flexion damping to prevent buckling
       {
         while(!Serial.available()) {
-          ::kp_in = 5;
-          ::kd_in = 3;
-          ::p_in = 0.7;
           ::t_in = 0;  // reset the torque reference to 0
-          if (-p_in + p_out > 0.05){
-            ::kp_in = 0;
-            ::kd_in = 0;
+          float pRef = 0.7;
+          if (-pRef + p_out > 0.05){
+            ::kp_in = 5;
+            ::kd_in = 3;
+            ::p_in = pRef;
             ::t_in = -1.3;
             // Serial.println("Added Feedforward");
           }
