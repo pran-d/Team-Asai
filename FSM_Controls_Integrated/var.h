@@ -76,6 +76,7 @@ const float t_decel = 2000; // Deceleration time in milliseconds
 static bool driver_installed = false;
 unsigned long start_time; // To track the start time of the motion
 bool motion_active = false; // To track if motion is active
+bool ERROR_STATE = false;
 
 int flag = 0;
 int counter = 0;
@@ -92,6 +93,7 @@ float theta_t; // Thigh angle
 float theta_k; // Knee angle
 float omega_t;
 float GRF;     // Ground Reaction Force
+float GRF_Scale = 1; //Scaling between GRF Sum and User Bodyweight
 int FSRs;      // FSR readings: 0=Sw, 1=HS, 2=MS, 3=TO
 float w1, w2, w3, w4, w5, bw; // Thresholds for GRF, bw can be approx 0.95 0f the user's bodyweight
 float theta1, theta2 ,theta3, theta4, theta5, theta6, theta7; // Angle thresholds
