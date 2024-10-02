@@ -5,8 +5,8 @@
 #include "MPU6050_6Axis_MotionApps20.h"
 #include "driver/twai.h"
 
-#define RX_PIN 18
-#define TX_PIN 19
+#define RX_PIN 19
+#define TX_PIN 18
 static bool driver_installed = false;
 
 const int fsrPins[] = {34, 36, 39, 35};//make 34 heel, 35 side lower, 36 side upper, 39 ball

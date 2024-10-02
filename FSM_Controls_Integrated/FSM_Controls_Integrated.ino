@@ -38,6 +38,7 @@ void loop(){
     {
       IMU_update();
       CAN_receive();
+      esp_err_t result = esp_now_send(peerAddress, (uint8_t *)&sensors, sizeof(sensors));
       // Serial.print(sensors.thighAngle); Serial.print(",");
       // Serial.println(sensors.fsr1);
       switch (currentState) {
@@ -55,7 +56,7 @@ void loop(){
         break;
       }
     }
-
+    
 
   // Supervisory FSM - decides which mode to be in
   

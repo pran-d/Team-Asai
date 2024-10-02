@@ -109,7 +109,21 @@ void loop() {
           if (Serial.available() > 0) {
             String input = Serial.readStringUntil('\n');
             float iRef = input.toFloat();
-            ::t_in = constrain(iRef, -10, 10);  // reset the torque reference to 0
+            float max_GRF = 200;
+            float max_Torque = iRef;
+
+            CAN_receive();
+            GRF_FSRs();
+            if (GRF > 60){
+              float max_GRF = 200;
+              float max_Torque = 2.5;
+              ::t_in = constrain(GRF/max_GRF*max_Torque, 0, max_Torque);
+              Serial.print("Input Torque:"); Serial.println(t_in);
+            }
+            else{
+              ::t_in = 0.6
+            }
+          
             if(::v_out < -1){
               ::t_in = 0;
             }
