@@ -26,7 +26,7 @@ void setup() {
   delay(500);
   ZeroMode(0x01); 
   delay(500);
-  Position_Control(2.5, 5, 2, 0.15);
+  enter_deadband();
 
   Serial.println(".......SETUP COMPLETE.......");
 }
@@ -54,7 +54,7 @@ void loop(){
     reset_inputs();
     while (::p_out < 2)
     {
-      Position_Control(3, 5, 2, 0.1);
+      enter_deadband();
     }
   }
 
@@ -62,6 +62,7 @@ void loop(){
   {
     IMU_update();
     CAN_receive();
+    enter_deadband();
     // esp_err_t result = esp_now_send(peerAddress, (uint8_t *)&sensors, sizeof(sensors));
     switch (::currentState) {
 

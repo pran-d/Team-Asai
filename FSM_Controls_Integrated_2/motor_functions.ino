@@ -340,6 +340,11 @@ void setVelocity(float vRef){
   ::v_in = vRef;  
 }
 
+void enter_deadband(){
+    Position_Control(2.5, 5, 2, 0.15);
+    Serial.print("Entered Deadband");
+}
+
 void cable_taut(float vRef){
   bool taut = false; bool moving = false;
   int counter = 0; float filtered_t_out[3];

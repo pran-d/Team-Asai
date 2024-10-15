@@ -73,7 +73,8 @@ void AscentStateMachine() {
       if(sensors.thighAngle > theta_t_ascent && sensors.fsr3 > 350){
         while (::p_out > 0.3)
         {
-          Position_Control(0, 5, 2, -0.1);
+          // Position_Control(0, 5, 2, -0.1);
+          cable_taut(-10);
         }
         Serial.println("Start Climbing");
         Stair_Ascent_Loading();
