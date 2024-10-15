@@ -36,13 +36,15 @@ void loop() {
   // Serial.print(send.time);
   // Serial.print(" , Shank angle: ");
   // Serial.print(send.shankAngle);
+  int sum_fsrs = send.fsr1+send.fsr2+send.fsr3+send.fsr4;
+  Serial.print(sum_fsrs);Serial.print(":  ");
   Serial.print(send.fsr1);Serial.print("  ");
   Serial.print(send.fsr2);Serial.print("  ");
   Serial.print(send.fsr3);Serial.print("  ");
   Serial.print(send.fsr4);Serial.print("  ");
   Serial.print("  , Gait Phase: ");
   Serial.println(gaitPhase);
-
+// delay(50);
   pack_cmd();
 
 }

@@ -121,7 +121,7 @@ void loop() {
               Serial.print("Input Torque:"); Serial.println(t_in);
             }
             else{
-              ::t_in = 0.6
+              ::t_in = 0.6;
             }
           
             if(::v_out < -1){
