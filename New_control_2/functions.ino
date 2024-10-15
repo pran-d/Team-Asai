@@ -10,18 +10,7 @@ void do_each_loop(char fromWhere) {
   IMU_update();  
   CAN_receive();
   constrain_inputs();
-  
-  if(::motor_active=='a')
-    pack_cmd();
-
-  // if (::t_out > I_MAX || ::v_out > V_MAX){
-  //   ERROR_STATE = 1;
-  //   ERROR_CODE = 1;
-  //   currentMode = Passive;
-  // }
-  // else{
-  //   ERROR_STATE = 0;
-  // }
+  pack_cmd();
 
   if (counter == 10) {
     Serial.printf("\n %c, t_out: %0.4f, t_in: %0.4f, p_in: %.4f, p_out: %.4f, v_in: %.4f, v_out: %.4f, kp_in: %.4f, kd_in: %.4f \n", fromWhere, t_out, t_in, p_in, p_out, v_in, v_out, kp_in, kd_in);
@@ -32,12 +21,36 @@ void do_each_loop(char fromWhere) {
   delay(10);
 }
 
-void reset_inputs(){
-  ::kp_in = 0;
-  ::kd_in = 0;
-  ::v_in = 0;
-  ::t_in = 0;
-  do_each_loop('r');
+void dmpDataReady() {
+  mpuInterrupt = true;
+}
+
+void IMU_initialize(){
+  //initialize device
+  Serial.println(F("Initializing I2C devices..."));
+  // mpu.initialize();
+  pinMode(INTERRUPT_PIN, INPUT);
+
+  //verify connection
+  Serial.println(F("Testing device connections..."));
+  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+
+  Serial.println(F("Initializing DMP..."));
+  devStatus = mpu.dmpInitialize();
+
+  if(devStatus==0){
+    mpu.CalibrateAccel(15);
+    mpu.CalibrateGyro(15);
+    mpu.PrintActiveOffsets();
+    mpu.setDMPEnabled(true);
+    Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
+    int mpuIntStatus = mpu.getIntStatus();
+    dmpReady = true;
+  } else{
+    Serial.print(F("DMP Initialization failed (code "));
+    Serial.print(devStatus);
+    Serial.println(")");
+  }
 }
 
 void CAN_receive(){
@@ -109,7 +122,6 @@ void ExitMode(unsigned int motorID) {
   send_message(motorID, data, 8);
   delay(100);
 }
-
 
 // Enter motor zero position
 void ZeroMode(unsigned int motorID) {
@@ -194,7 +206,36 @@ static void handle_rx_message(twai_message_t &message) {
   }
 }
 
-unsigned int float_to_uint(float x, float x_min, float x_max, int bits) {
+
+void unpack_espCan(uint8_t* data){
+  int time = (data[2] << 16) | (data[1] << 8) | data[0];
+  // Serial.println(time);
+  
+  int gaitphase = data[3];
+  int shankAngle = ((data[5] << 8 ) | data[4] );
+  if(shankAngle>30000)
+  {
+    shankAngle -= 65535;
+  }
+
+  sensors.shankAngle= shankAngle/100.0;
+  sensors.time= time;
+  sensors.gaitphase= gaitphase;
+}
+
+
+void unpack_fsrVal(uint8_t* data)
+{
+  sensors.fsr1 = (data[1] << 8) | data[0];
+  sensors.fsr2 = (data[3] << 8) | data[2];
+  sensors.fsr3 = (data[5] << 8) | data[4];
+  sensors.fsr4 = (data[7] << 8) | data[6];
+  // Serial.print(sensors.fsr1); Serial.print(", "); Serial.print(sensors.fsr2); Serial.print(", "); Serial.print(sensors.fsr3); Serial.print(", "); Serial.print(sensors.fsr4); Serial.println("");
+}
+
+
+unsigned int float_to_uint(float x, float x_min, float x_max, int bits) 
+{
   float span = x_max - x_min;
   float offset = x_min;
   unsigned int result = 0;
@@ -206,7 +247,8 @@ unsigned int float_to_uint(float x, float x_min, float x_max, int bits) {
   return result;
 }
 
-float uint_to_float(unsigned int x_int, float x_min, float x_max, int bits) {
+float uint_to_float(unsigned int x_int, float x_min, float x_max, int bits) 
+{
   float span = x_max - x_min;
   float offset = x_min;
   float pgg = 0;
@@ -235,118 +277,38 @@ void unpack_reply(uint8_t *data)
   delay(1);
 }
 
-void unpack_espCan(uint8_t* data){
-  int time = (data[2] << 16) | (data[1] << 8) | data[0];
-  // Serial.println(time);
-  
-  int gaitphase = data[3];
-  int shankAngle = ((data[5] << 8 ) | data[4] );
-  if(shankAngle>30000)
-  {
-    shankAngle -= 65535;
-  }
-  sensors.shankAngle= shankAngle/100.0;
-  sensors.time= time;
-  sensors.gaitphase= gaitphase;
-}
-
-void unpack_fsrVal(uint8_t* data)
+void IMU_update()
 {
-  sensors.fsr1 = (data[1] << 8) | data[0];
-  sensors.fsr2 = (data[3] << 8) | data[2];
-  sensors.fsr3 = (data[5] << 8) | data[4];
-  sensors.fsr4 = (data[7] << 8) | data[6];
-  // Serial.print(sensors.fsr1); Serial.print(", "); Serial.print(sensors.fsr2); Serial.print(", "); Serial.print(sensors.fsr3); Serial.print(", "); Serial.print(sensors.fsr4); Serial.println("");
-}
-
-
-//---------------------------------Controllers------------------------------
-void Position_Control(float pRef, float Kp, float Kd, float feedforward){
-  kp_in = Kp;
-  kd_in = Kd;
-  p_in = pRef;
-  t_in = feedforward;  // reset the torque reference to 0
-  do_each_loop('p');
-}
-
-void Stair_Ascent_Loading()
-{
-  CAN_receive();
-  GRF_FSRs();
-  float iRef = -3;
-  int rampTime = 300;
-  iRef = constrain(iRef, -10, 10); 
-  int counter_loc = 0;
-  int rampDownCounter = 0;
-  long startTime = millis();
-  bool high_vel = false;
-  float t_damp = 0;
-  
-  while(sensors.thighAngle < 80 && sensors.kneeAngle > 10 && sensors.shankAngle < 20 && GRF > 200) //maximum thigh angle from which we allow lifting? 
-  {
-    counter_loc = counter_loc+1;
-    if (counter_loc < rampTime) 
-    {
-      ::t_in = (iRef / rampTime) * counter_loc;
-    } 
-    else
-    {
-      ::t_in = iRef;
-    }
-
-    if(sensors.thighAngularVelocity>imuHighVelThresh && ::v_out<-7) // if extending at high velocity, slow it down
-    {
-      t_damp = 0.1 * (-::v_out-7);
-      ::t_in += t_damp;
-      setVelocity(-7);
-      do_each_loop('v');
-    }
-
-    // if(sensors.thighAngle<imuStableAngle && sensors.thighAngularVelocity<imuFlexionThresh){
-    //   t_damp = 0.01*abs(sensors.thighAngularVelocity);
-    //   ::t_in -= t_damp;
-    //   do_each_loop('w');
-    // }
-
-    // if(::v_out>7 && ::p_out>3) // if sufficiently flexed and motor still backdriving, give torque
-    // {
-    //   ::t_in = -2 - ::v_out*0.08;
-    // }
-
-    // if(millis()-startTime > 8000) // time limit to climb crossed
-    // {
-    //   ERROR_STATE = 1;
-    //   ERROR_CODE = 3;
-    //   Serial.println("Time crossed 6s");
-    //   break;
-    // }
-
-    // if(currentMode == Passive)
-    // {
-    //   break;
-    // }
-
-    do_each_loop('s');  
+  if (!dmpReady) {
+    Serial.print("h");
+    devStatus = mpu.dmpInitialize();
+    if(devStatus==0)
+      dmpReady=true;
   }
-
-  currentPhase = Standing;
-  currentState = Walking;
-  reset_inputs();
-  do_each_loop('s');     
+  // read a packet from FIFO
+  if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { // Get the Latest packet  
+      // display Euler angles in degrees
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      mpu.dmpGetGyro(&av, fifoBuffer); 
+  }
+  angleX=ypr[0] * 180/M_PI;
+  angleY=ypr[1] * 180/M_PI;
+  angleZ=ypr[2] * 180/M_PI;
+  sensors.thighAngle= -(angleZ-90);
+  sensors.kneeAngle= sensors.thighAngle-sensors.shankAngle;
 }
 
-
-void setVelocity(float vRef){
-  ::kp_in = 0;
-  ::kd_in = 5;
-  ::v_in = vRef;  
+void GRF_FSRs()
+{
+  GRF=sensors.fsr1+sensors.fsr2+sensors.fsr3+sensors.fsr4;
 }
 
 void cable_taut(float vRef){
   bool taut = false; bool moving = false;
   int counter = 0; float filtered_t_out[3];
-  long timer = millis();
-  while(!taut && !Serial.available() && millis()-timer<8000)
+  while(!taut && !Serial.available())
   {
     if(abs(v_out)>3){
       moving = true;
@@ -359,16 +321,43 @@ void cable_taut(float vRef){
       counter=0;
     }
     float average_t_out = (filtered_t_out[0]+filtered_t_out[1]+filtered_t_out[2])/3;
-    do_each_loop('f');
-    if(abs(v_out) < ZERO_VELOCITY_BAND && abs(average_t_out)>0.35 && moving)
+    do_each_loop(::mode);
+    if(abs(v_out) < ZERO_VELOCITY_BAND && abs(average_t_out)>0.5 && moving)
     {
       taut = true;
+      ::v_in = 0; 
+      ::kp_in = 0; ::kd_in = 0;  
+      do_each_loop(::mode);
       break;
     }
-  }
-  ::v_in = 0; ::t_in = 0;
-  ::kp_in = 0; ::kd_in = 0;  
-  do_each_loop('f'); 
+  } 
 }
 
+void reset_inputs(){
+  ::kp_in = 0;
+  ::kd_in = 0;
+  ::v_in = 0;
+  ::t_in = 0;
+  do_each_loop(::mode);
+}
 
+void setVelocity(float vRef){
+  ::kp_in = 0;
+  ::kd_in = 5;
+  ::v_in = vRef;  
+}
+
+void setPosition(float pRef, float feedforwardTorque){
+  ::kp_in = 4.3;
+  ::kd_in = 3.5;
+  ::p_in = pRef;
+  ::t_in = feedforwardTorque;  // reset the torque reference to 0
+}
+
+bool isExtended(){
+  float ext_angle = 10;
+  if(::angleY - sensors.shankAngle < ext_angle)
+    return true;
+  else
+    return false;
+}

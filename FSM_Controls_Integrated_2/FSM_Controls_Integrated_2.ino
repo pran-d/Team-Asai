@@ -22,12 +22,18 @@ void setup() {
 
   EnterMode(0x01);
   delay(1000);
+
+  int pressed = 0;
+  while(pressed==0){
+    pressed = checkMode();
+  }
+  
+  Serial.println("Calibrating extended position...");
   cable_taut(-7);
   delay(500);
   ZeroMode(0x01); 
   delay(500);
   Position_Control(2.5, 5, 2, 0.15);
-
   Serial.println(".......SETUP COMPLETE.......");
 }
 
