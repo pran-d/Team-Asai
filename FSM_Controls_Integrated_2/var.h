@@ -6,8 +6,15 @@
 #include "MPU6050_6Axis_MotionApps20.h"
 #include <esp_now.h>
 #include <WiFi.h>
+#include <WebServer.h>
 
 MPU6050 mpu;
+
+const char* ssid = "Redmi Note 9";
+const char* password = "arvind05";
+WebServer server(80);
+bool stopFlag = true;
+bool formSubmitted = false;  // Flag to indicate form submission
 
 #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
 
@@ -136,7 +143,9 @@ int FSRdescentThreshLower = 70, FSRdescentThreshUpper = 300;
 float theta_t_ascent = 35, theta_t_walking = 10;
 float imuHighVelThresh = 2, imuFlexionThresh = -2, imuStableAngle = 25;
 
-
-
 float region1 = 0.4, region2 = 1, region3 = 1.5;
 float k1 = 0.25, k2 = 0.5, k3 = 1;
+
+float iRef = -4.5, iRef1= -2.0;
+// int rampTime1 = 100, rampTime2 = 175;
+float knee_AscentRampDown= 50, knee_AscentRampDownStop= 25;

@@ -25,6 +25,31 @@ void setup() {
   EnterMode(0x01);
   delay(1000);
 
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+
+  // Set up the web server routes
+  server.on("/", handleRoot);  // Home page route
+  server.on("/modify",HTTP_POST, handleModify);  // Handle form submission
+  server.on("/Ascent", HTTP_POST, handleAscent);
+  server.on("/Descent", HTTP_POST, handleDescent);
+  server.on("/Passive", HTTP_POST, handlePassive);
+
+
+  // Start the web server
+  server.begin();
+  Serial.println("Web server started");
+
+  Serial.print("ESP32 IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  // initESPNow();
+
   int pressed = 0;
   while(pressed==0){
     pressed = checkMode();

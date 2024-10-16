@@ -1,5 +1,6 @@
 void WalkingStateMachine() 
 {
+  server.handleClient();
   Serial.println("Entered Walking State");
   FSRs=sensors.gaitphase;
 
@@ -43,6 +44,7 @@ void WalkingStateMachine()
 }
 
 void AscentStateMachine() {
+  server.handleClient();
   switch (currentPhase) {
     case Sw:
     {
@@ -74,6 +76,7 @@ void AscentStateMachine() {
 }
 
 void DescentStateMachine() {
+  server.handleClient();
   switch (::currentPhase) {
     case Sw:
     {
