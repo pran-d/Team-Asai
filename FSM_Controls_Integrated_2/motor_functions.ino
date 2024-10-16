@@ -3,9 +3,9 @@ void constrain_inputs(){
 }
 
 void do_each_loop(char fromWhere) {
-  counter += 1;
-  currentTime = millis();
-  previousTime = currentTime;
+  ::counter += 1;
+  ::currentTime = millis();
+  ::previousTime = currentTime;
 
   IMU_update();  
   CAN_receive();
@@ -26,7 +26,7 @@ void do_each_loop(char fromWhere) {
   if (counter == 10) {
     Serial.printf("\n %c, t_out: %0.4f, t_in: %0.4f, p_in: %.4f, p_out: %.4f, v_in: %.4f, v_out: %.4f, kp_in: %.4f, kd_in: %.4f \n", fromWhere, t_out, t_in, p_in, p_out, v_in, v_out, kp_in, kd_in);
     Serial.printf("thigh_angle: %.2f, shank_angle: %.2f, knee_angle: %.2f \n", sensors.thighAngle, sensors.shankAngle, sensors.kneeAngle);
-    Serial.printf("GRF: %d,  %d,  %d \n\n", sensors.fsr1, sensors.fsr2, sensors.fsr3);
+    Serial.printf("GRF: %d,  %d,  %d, %d \n\n", sensors.fsr1, sensors.fsr2, sensors.fsr3, sensors.fsr4);
     counter = 0;
   }
   delay(10);
@@ -256,6 +256,7 @@ void unpack_fsrVal(uint8_t* data)
   sensors.fsr2 = (data[3] << 8) | data[2];
   sensors.fsr3 = (data[5] << 8) | data[4];
   sensors.fsr4 = (data[7] << 8) | data[6];
+  GRF_FSRs();
   // Serial.print(sensors.fsr1); Serial.print(", "); Serial.print(sensors.fsr2); Serial.print(", "); Serial.print(sensors.fsr3); Serial.print(", "); Serial.print(sensors.fsr4); Serial.println("");
 }
 
@@ -267,6 +268,14 @@ void Position_Control(float pRef, float Kp, float Kd, float feedforward){
   p_in = pRef;
   t_in = feedforward;  // reset the torque reference to 0
   do_each_loop('p');
+}
+
+void enter_deadband(){
+  while (abs(::p_out - 3) > 0.4)
+  {
+    Position_Control(3, 5, 2, -0.1);
+  }
+  reset_inputs();
 }
 
 void Stair_Ascent_Loading()
@@ -282,7 +291,7 @@ void Stair_Ascent_Loading()
   bool high_vel = false;
   float t_damp = 0;
   
-  while(sensors.thighAngle < 80 && sensors.kneeAngle > 10 && sensors.shankAngle < 20 && GRF > 200) //maximum thigh angle from which we allow lifting? 
+  while(sensors.thighAngle > 10 && sensors.shankAngle < 20) //maximum thigh angle from which we allow lifting? 
   {
     counter_loc = counter_loc+1;
     if (counter_loc < rampTime) 
@@ -294,13 +303,13 @@ void Stair_Ascent_Loading()
       ::t_in = iRef;
     }
 
-    if(sensors.thighAngularVelocity>imuHighVelThresh && ::v_out<-7) // if extending at high velocity, slow it down
-    {
-      t_damp = 0.1 * (-::v_out-7);
-      ::t_in += t_damp;
-      setVelocity(-7);
-      do_each_loop('v');
-    }
+    // if(sensors.thighAngularVelocity>imuHighVelThresh && ::v_out<-7) // if extending at high velocity, slow it down
+    // {
+    //   t_damp = 0.1 * (-::v_out-7);
+    //   ::t_in += t_damp;
+    //   setVelocity(-7);
+    //   do_each_loop('v');
+    // }
 
     // if(sensors.thighAngle<imuStableAngle && sensors.thighAngularVelocity<imuFlexionThresh){
     //   t_damp = 0.01*abs(sensors.thighAngularVelocity);
@@ -371,4 +380,37 @@ void cable_taut(float vRef){
   do_each_loop('f'); 
 }
 
+void descentController(){
+  if (-::p_in + ::p_out > 0.05 && -::p_in + ::p_out < region1){
+    ::kp_in = 0;
+    ::kd_in = 0;
+    ::t_in = - k1 * (-::p_in + ::p_out) ;
+    Serial.print("1 ");
+  }
 
+  else if (-::p_in + ::p_out > region1 && -::p_in + ::p_out < region2){
+    ::kp_in = 0;
+    ::kd_in = 0;
+    ::t_in = -0.3 - k2 * (-::p_in + ::p_out);
+    Serial.print("2 ");
+  }
+
+  else if (-::p_in + ::p_out > region2 && -::p_in + ::p_out < region3){
+    ::kp_in = 0;
+    ::kd_in = 0;
+    ::t_in = -0.3 - k3 * (-::p_in + ::p_out);
+    Serial.print("3 ");
+  }
+
+  else if (-::p_in + ::p_out > region3){
+    ::kp_in = 0;
+    ::kd_in = 0;
+    ::t_in = -2;
+    if(::v_out > 5){
+      ::t_in = -2 - ::v_out * 0.08;
+    }
+    Serial.print("4 ");
+  }
+
+  do_each_loop('d');
+}

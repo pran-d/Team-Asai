@@ -27,21 +27,21 @@ void setup() {
   while(pressed==0){
     pressed = checkMode();
   }
-  
+
   Serial.println("Calibrating extended position...");
   cable_taut(-7);
   delay(500);
   ZeroMode(0x01); 
   delay(500);
-  Position_Control(2.5, 5, 2, 0.15);
+  enter_deadband();
   Serial.println(".......SETUP COMPLETE.......");
 }
 
 
 void loop(){
-
   // allowing to test with motor not rotating
   if (Serial.available() > 0){
+    reset_inputs();
     ::motor_active = Serial.read();
   }
 
@@ -58,16 +58,18 @@ void loop(){
   if (::currentMode==Passive)
   {
     reset_inputs();
-    while (::p_out < 2)
-    {
-      Position_Control(3, 5, 2, 0.1);
-    }
+    enter_deadband();
+    pressed = checkMode();
+    buttonSwitchState(pressed);
   }
 
   if (::currentMode==Stair)
   {
+    pressed = checkMode();
+    buttonSwitchState(pressed);
     IMU_update();
     CAN_receive();
+    
     // esp_err_t result = esp_now_send(peerAddress, (uint8_t *)&sensors, sizeof(sensors));
     switch (::currentState) {
 

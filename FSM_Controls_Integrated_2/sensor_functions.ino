@@ -27,17 +27,20 @@ void buttonSwitchState(int pressed){
   }
   else if(pressed==3)
   {
+    reset_inputs();
+    Serial.println("************ Descent state entered ************");
     ::currentMode = Stair;
-    ::currentPhase = Standing;
-    ::motor_active = 'p';
+    ::currentState = Descent;
+    ::currentPhase = Sw;
+    ::motor_active = 'a';
     delay(300);
   }
   else if(pressed==4)
   {
     ::motor_active = 'p';
     reset_inputs();
-    ExitMode(0x01);
     Serial.println("Motor mode exited");
+    ExitMode(0x01);
     delay(300);
   }
 }
@@ -125,11 +128,10 @@ void IMU_update()
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      mpu.dmpGetGyro(av, fifoBuffer); 
+      mpu.dmpGetGyro(&av, fifoBuffer); 
   }
   angleX= ypr[2] * 180/M_PI - 96;
-  angleXdot = av[2];
+  // angleXdot = av.x;
   sensors.thighAngle= angleX;
   sensors.kneeAngle= angleX-sensors.shankAngle;
-  sensors.thighAngularVelocity = angleXdot;
 }

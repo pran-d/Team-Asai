@@ -20,7 +20,7 @@ uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 // orientation/motion vars
 Quaternion q;           // [w, x, y, z]         quaternion container
-int32_t* av;         // [x, y, z]            accel sensor measurements
+VectorInt16 av;         // [x, y, z]            accel sensor measurements
 VectorFloat gravity;    // [x, y, z]            gravity vector
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
@@ -114,7 +114,6 @@ typedef struct struct_message {
   float kneeAngle;
   float thighAngle;
   float shankAngle;
-  float thighAngularVelocity;
 } ;
 
 struct_message sensors;
@@ -123,6 +122,10 @@ uint8_t peerAddress[] =  {0xD8, 0xBC, 0x38, 0xE5, 0xBD, 0x00};//{0x2C , 0xBC, 0x
 
 // thresholds to be set
 int StanceThresh = 80;
-int FSRascentThresh = 200; 
+int FSRascentThresh = 300; 
+int FSRdescentThreshLower = 70, FSRdescentThreshUpper = 300; 
 float theta_t_ascent = 35, theta_t_walking = 10;
 float imuHighVelThresh = 2, imuFlexionThresh = -2, imuStableAngle = 25;
+
+float region1 = 0.4, region2 = 1, region3 = 1.5;
+float k1 = 0.25, k2 = 0.5, k3 = 1;
