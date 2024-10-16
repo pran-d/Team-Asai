@@ -121,8 +121,8 @@ struct_message sensors;
 uint8_t peerAddress[] =  {0xD8, 0xBC, 0x38, 0xE5, 0xBD, 0x00};//{0x2C , 0xBC, 0xBB, 0x0D, 0x75, 0xF0};
 
 // thresholds to be set
-int StanceThresh = 80;
-int FSRascentThresh = 300; 
+int StanceThresh = 50;
+int FSRascentThresh1 = 200, FSRascentThresh2 = 300; 
 int FSRdescentThreshLower = 70, FSRdescentThreshUpper = 300; 
 float theta_t_ascent = 35, theta_t_walking = 10;
 float imuHighVelThresh = 2, imuFlexionThresh = -2, imuStableAngle = 25;

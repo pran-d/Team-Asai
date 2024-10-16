@@ -72,6 +72,7 @@ void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 
 void GRF_FSRs(){
   GRF=GRF_Scale*(sensors.fsr1+sensors.fsr2+sensors.fsr3+sensors.fsr4);
+  // Serial.printf("Sensor 1: %d,Sensor 2: %d.Sensor 3: %d,Sensor 4: %d",sensors.fsr1,sensors.fsr2,sensors.fsr3,sensors.fsr4);
 }
 
 

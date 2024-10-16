@@ -1,6 +1,5 @@
 void WalkingStateMachine() 
 {
-  enter_deadband();
   Serial.println("Entered Walking State");
   FSRs=sensors.gaitphase;
 
@@ -18,7 +17,7 @@ void WalkingStateMachine()
       }
 
       // Walking to Ascent
-      if (GRF > FSRascentThresh && sensors.thighAngle > theta_t_ascent)
+      if (GRF > FSRascentThresh1 && sensors.thighAngle > theta_t_ascent)
       {
         Serial.println("SW -> MS and Walking -> Stair Ascent");        
         currentPhase = MS; 
@@ -32,7 +31,7 @@ void WalkingStateMachine()
       Serial.println("In Swing");
 
       // Walking to Ascent
-      if (GRF > FSRascentThresh && sensors.thighAngle > theta_t_ascent)
+      if (GRF > FSRascentThresh2 && sensors.thighAngle > theta_t_ascent)
       {
         Serial.println("SW -> MS and Walking -> Stair Ascent");        
         currentPhase = MS; 
@@ -47,11 +46,11 @@ void AscentStateMachine() {
   switch (currentPhase) {
     case Sw:
     {
-      if (GRF > FSRascentThresh && sensors.thighAngle > theta_t_ascent)
+      if (GRF > FSRascentThresh1 && sensors.thighAngle > theta_t_ascent)
       {        
         currentPhase = MS; currentState = Ascent; // Walking to Ascent
       }
-      if (GRF > FSRascentThresh && sensors.thighAngle < theta_t_walking ) 
+      if (GRF > FSRascentThresh1 && sensors.thighAngle < theta_t_walking ) 
       {
         Serial.println("Ascent to Walking");        
         currentPhase = Standing; 
@@ -62,10 +61,11 @@ void AscentStateMachine() {
 
     case MS:
     {
-      if(sensors.thighAngle > theta_t_ascent && GRF > 350){
+      if(sensors.thighAngle > theta_t_ascent && GRF > FSRascentThresh2){
         Serial.println("Start Climbing");
         Stair_Ascent_Loading();
         Serial.println("Stair Ascent Finished");
+        enter_deadband();
       }
       break;
     }

@@ -271,9 +271,9 @@ void Position_Control(float pRef, float Kp, float Kd, float feedforward){
 }
 
 void enter_deadband(){
-  while (abs(::p_out - 3) > 0.4)
+  while (abs(::p_out - 3) > 0.5)
   {
-    Position_Control(3, 5, 2, -0.1);
+    Position_Control(3, 5, 2, 0);
   }
   reset_inputs();
 }
@@ -282,25 +282,47 @@ void Stair_Ascent_Loading()
 {
   CAN_receive();
   GRF_FSRs();
-  float iRef = -3;
-  int rampTime = 300;
+  float iRef1 = -2.0;
+  float iRef = -4.5;
+  float iRef2 = iRef;
+  int rampTime1 = 75;
+  int rampTime2 = 175;
   iRef = constrain(iRef, -10, 10); 
   int counter_loc = 0;
+  bool enter_highAngle = 0;
   int rampDownCounter = 0;
   long startTime = millis();
   bool high_vel = false;
   float t_damp = 0;
   
-  while(sensors.thighAngle > 10 && sensors.shankAngle < 20) //maximum thigh angle from which we allow lifting? 
+  while(sensors.thighAngle > 10 && abs(sensors.shankAngle) < 20 && sensors.kneeAngle > 10) //maximum thigh angle from which we allow lifting? 
   {
     counter_loc = counter_loc+1;
-    if (counter_loc < rampTime) 
+    if (counter_loc < rampTime1) 
     {
-      ::t_in = (iRef / rampTime) * counter_loc;
+      ::t_in = (iRef1 / rampTime1) * counter_loc;
     } 
+    else if (counter_loc < rampTime2) {
+      ::t_in = iRef1 + (iRef - iRef1)/(rampTime2 - rampTime1) * (counter_loc-rampTime1);
+    }
     else
     {
       ::t_in = iRef;
+    }
+    if (sensors.kneeAngle<50)
+    {
+      if (enter_highAngle == 0) {
+          iRef2 = ::t_in;
+          enter_highAngle = 1;
+      }
+      // ::t_in = iRef*(1 - rampDownCounter / rampTime);
+      // rampDownCounter+=1;
+      if (sensors.kneeAngle > 25) {
+        ::t_in = iRef2 * sensors.kneeAngle/25;  
+      }
+      else {
+        ::t_in = 0;
+      }
     }
 
     // if(sensors.thighAngularVelocity>imuHighVelThresh && ::v_out<-7) // if extending at high velocity, slow it down

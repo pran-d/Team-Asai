@@ -20,6 +20,7 @@ void setup() {
   pinMode(23, OUTPUT);
   digitalWrite(23, HIGH);
 
+  delay(5000);
   EnterMode(0x01);
   delay(1000);
 
@@ -44,6 +45,7 @@ void loop(){
     reset_inputs();
     ::motor_active = Serial.read();
   }
+  
 
   /* 
   switching mode based on buttons pressed:
