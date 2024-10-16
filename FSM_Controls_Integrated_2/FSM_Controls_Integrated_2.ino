@@ -25,29 +25,34 @@ void setup() {
   EnterMode(0x01);
   delay(1000);
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.println("Connecting to WiFi...");
+  int wifi_mode=0;
+
+  if (wifi_mode==1){
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(1000);
+      Serial.println("Connecting to WiFi...");
+    }
+    Serial.println("Connected to WiFi");
+
+    // Set up the web server routes
+    server.on("/", handleRoot);  // Home page route
+    server.on("/modify",HTTP_POST, handleModify);  // Handle form submission
+    server.on("/Ascent", HTTP_POST, handleAscent);
+    server.on("/Descent", HTTP_POST, handleDescent);
+    server.on("/Passive", HTTP_POST, handlePassive);
+
+    // Start the web server
+    server.begin();
+    Serial.println("Web server started");
+
+    Serial.print("ESP32 IP Address: ");
+    Serial.println(WiFi.localIP());
+
   }
-  Serial.println("Connected to WiFi");
-
-  // Set up the web server routes
-  server.on("/", handleRoot);  // Home page route
-  server.on("/modify",HTTP_POST, handleModify);  // Handle form submission
-  server.on("/Ascent", HTTP_POST, handleAscent);
-  server.on("/Descent", HTTP_POST, handleDescent);
-  server.on("/Passive", HTTP_POST, handlePassive);
-
-
-  // Start the web server
-  server.begin();
-  Serial.println("Web server started");
-
-  Serial.print("ESP32 IP Address: ");
-  Serial.println(WiFi.localIP());
-
+  
   // initESPNow();
 
   int pressed = 0;
@@ -72,7 +77,6 @@ void loop(){
     ::motor_active = Serial.read();
   }
   
-
   /* 
   switching mode based on buttons pressed:
   1 - Enter Passive FSM mode, enter motor mode with motor active
@@ -80,6 +84,8 @@ void loop(){
   3 - Enter Stair FSM mode with motor inactive
   4 - Exit motor mode with motor inactive
   */
+
+  
   int pressed = checkMode();
   buttonSwitchState(pressed);
 
@@ -112,6 +118,8 @@ void loop(){
       case Descent:
       DescentStateMachine();
       break;
+
     }
   }
+  
 }

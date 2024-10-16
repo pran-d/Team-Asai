@@ -271,9 +271,9 @@ void Position_Control(float pRef, float Kp, float Kd, float feedforward){
 }
 
 void enter_deadband(){
-  while (abs(::p_out - 3) > 0.5)
+  while (abs(::p_out - 3) > 0.1)
   {
-    Position_Control(3, 5, 2, 0);
+    Position_Control(3, 20, 3, 0);
   }
   reset_inputs();
 }
