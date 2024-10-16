@@ -278,6 +278,37 @@ void enter_deadband(){
   reset_inputs();
 }
 
+void Stair_Ascent_Loading_GUI(){
+  CAN_receive();
+  GRF_FSRs();
+  int counter_loc = 0;
+  
+  while(sensors.thighAngle > 10 && abs(sensors.shankAngle) < 20 && sensors.kneeAngle > 10)
+  {
+    counter_loc +=1;  
+
+    //Torque Build up Controller - Quadratic wrt time 
+    ::t_in = -constrain(Stair_Ascent_a*counter_loc*counter_loc + Stair_Ascent_b*counter_loc + Stair_Ascent_c, -I_max_Ascent, I_max_Ascent);
+
+    //Torque wind down Controller - Exponential Decay wrt Knee Angle
+    if (sensors.kneeAngle > 25) { 
+        ::t_in = -constrain(Stair_Ascent_A*(exp(Stair_Ascent_k*sensors.kneeAngle)-1), -I_max_Ascent, I_max_Ascent);
+      }
+    else {
+      ::t_in = 0;
+    } 
+
+    do_each_loop('s');     
+    
+  }
+
+  currentPhase = Standing;
+  currentState = Walking;
+  reset_inputs();
+  do_each_loop('s');     
+
+}
+
 void Stair_Ascent_Loading()
 {
   CAN_receive();

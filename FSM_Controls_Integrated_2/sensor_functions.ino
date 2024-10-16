@@ -14,6 +14,7 @@ void buttonSwitchState(int pressed){
     ::motor_active = 'a';
     reset_inputs();
     EnterMode(0x01);
+    change_Indicator_LED(1);
     Serial.println("Motor mode entered");
     delay(300);
   }
@@ -23,6 +24,7 @@ void buttonSwitchState(int pressed){
     ::currentState = Walking;
     ::currentPhase = Standing;
     ::motor_active = 'a';
+    change_Indicator_LED(0);
     delay(300);
   }
   else if(pressed==3)
@@ -33,15 +35,28 @@ void buttonSwitchState(int pressed){
     ::currentState = Descent;
     ::currentPhase = Sw;
     ::motor_active = 'a';
+    change_Indicator_LED(2);
     delay(300);
   }
   else if(pressed==4)
   {
     ::motor_active = 'p';
+    change_Indicator_LED(3);
     reset_inputs();
     Serial.println("Motor mode exited");
     ExitMode(0x01);
     delay(300);
+  }
+}
+
+void change_Indicator_LED(float pin){
+  for(int i=0;i<4;i++) {
+    if (pin == i){
+      digitalWrite(keyPinsLED[i], HIGH);
+    }
+    else{
+      digitalWrite(keyPinsLED[i], LOW);
+    }
   }
 }
 

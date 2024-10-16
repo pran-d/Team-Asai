@@ -63,7 +63,8 @@ void AscentStateMachine() {
     {
       if(sensors.thighAngle > theta_t_ascent && GRF > FSRascentThresh2){
         Serial.println("Start Climbing");
-        Stair_Ascent_Loading();
+        // Stair_Ascent_Loading();
+        Stair_Ascent_Loading_GUI();
         Serial.println("Stair Ascent Finished");
         enter_deadband();
       }

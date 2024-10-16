@@ -7,6 +7,7 @@ void setup() {
   for(int i=0;i<4;i++)
   {
     pinMode(keyPins[i], INPUT_PULLUP);
+    pinMode(keyPinsLED[i], OUTPUT);
   }
 
   startTime = millis();

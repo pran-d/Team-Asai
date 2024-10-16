@@ -103,6 +103,7 @@ float w1, w2, w3, w4, w5, bw; // Thresholds for GRF, bw can be approx 0.95 0f th
 float theta1, theta2 ,theta3, theta4, theta5, theta6, theta7; // Angle thresholds
 
 const int keyPins[4]={2,4,13,12};
+const int keyPinsLED[4] = {5, 16, 17, 26};
 
 typedef struct struct_message {
   int time;
@@ -120,12 +121,22 @@ struct_message sensors;
 
 uint8_t peerAddress[] =  {0xD8, 0xBC, 0x38, 0xE5, 0xBD, 0x00};//{0x2C , 0xBC, 0xBB, 0x0D, 0x75, 0xF0};
 
-// thresholds to be set
+// Thresholds to be set
+//Stance 
 int StanceThresh = 50;
+
+// Ascent
 int FSRascentThresh1 = 200, FSRascentThresh2 = 300; 
+float Stair_Ascent_a = 0.00001; float Stair_Ascent_b = 0.027381; float Stair_Ascent_c = 0; //Quadratic for Buildup Torque 
+float Stair_Ascent_A = 1; float Stair_Ascent_k = 0.068; // Decay for wind down Torque 
+float I_max_Ascent = 4.5; //Saturate Build up at this value
+
+//Descent
 int FSRdescentThreshLower = 70, FSRdescentThreshUpper = 300; 
 float theta_t_ascent = 35, theta_t_walking = 10;
 float imuHighVelThresh = 2, imuFlexionThresh = -2, imuStableAngle = 25;
+
+
 
 float region1 = 0.4, region2 = 1, region3 = 1.5;
 float k1 = 0.25, k2 = 0.5, k3 = 1;
