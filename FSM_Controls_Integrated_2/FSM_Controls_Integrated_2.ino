@@ -25,7 +25,7 @@ void setup() {
   EnterMode(0x01);
   delay(1000);
 
-  int wifi_mode=0;
+  int wifi_mode=1;
 
   if (wifi_mode==1){
 
@@ -58,6 +58,7 @@ void setup() {
   int pressed = 0;
   while(pressed==0){
     pressed = checkMode();
+    server.handleClient();
   }
 
   Serial.println("Calibrating extended position...");
@@ -84,15 +85,12 @@ void loop(){
   3 - Enter Stair FSM mode with motor inactive
   4 - Exit motor mode with motor inactive
   */
-
   
   int pressed = checkMode();
   buttonSwitchState(pressed);
 
   if (::currentMode==Passive)
   {
-    reset_inputs();
-    enter_deadband();
     pressed = checkMode();
     buttonSwitchState(pressed);
   }

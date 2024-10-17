@@ -188,6 +188,24 @@ void handleRoot() {
   htmlForm += String(k3, 2); // Insert region3 variable with 2 decimal places
 
   htmlForm += R"(">
+                </td>
+              </tr>
+
+              <!-- Row for descentDeadband, descentKp -->
+              <tr>
+                <td>
+                  <label for="descentDeadband">descentDeadband:</label><br>
+                  <input type="text" id="descentDeadband" name="descentDeadband" value=")";
+  htmlForm += String(descentDeadband, 2); // Insert region1 variable with 2 decimal places
+  
+  htmlForm += R"(">
+              </td>
+              
+              <td>
+                  <label for="descentKp">descentKp:</label><br>
+                  <input type="text" id="descentKp" name="descentKp" value=")";
+  htmlForm += String(descentKp, 2);
+  htmlForm += R"(">
               </td>
             </tr>
 

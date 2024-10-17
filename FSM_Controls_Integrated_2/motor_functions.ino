@@ -28,8 +28,35 @@ void do_each_loop(char fromWhere) {
     Serial.printf("thigh_angle: %.2f, shank_angle: %.2f, knee_angle: %.2f \n", sensors.thighAngle, sensors.shankAngle, sensors.kneeAngle);
     Serial.printf("GRF: %d,  %d,  %d, %d \n\n", sensors.fsr1, sensors.fsr2, sensors.fsr3, sensors.fsr4);
     counter = 0;
+
+     // Create a formatted string for the first line
+    // String output = String("\n ") + String(fromWhere) + 
+    //                 String(", t_out: ") + String(t_out, 4) + 
+    //                 String(", t_in: ") + String(t_in, 4) + 
+    //                 String(", p_in: ") + String(p_in, 4) + 
+    //                 String(", p_out: ") + String(p_out, 4) + 
+    //                 String(", v_in: ") + String(v_in, 4) + 
+    //                 String(", v_out: ") + String(v_out, 4) + 
+    //                 String(", kp_in: ") + String(kp_in, 4) + 
+    //                 String(", kd_in: ") + String(kd_in, 4) + "\n";
+
+    // // Add the second line for angles
+    // output += String("thigh_angle: ") + String(sensors.thighAngle, 2) + 
+    //           String(", shank_angle: ") + String(sensors.shankAngle, 2) + 
+    //           String(", knee_angle: ") + String(sensors.kneeAngle, 2) + "\n";
+
+    // // Add the third line for GRF
+    // output += String("GRF: ") + String(sensors.fsr1) + 
+    //           String(", ") + String(sensors.fsr2) + 
+    //           String(", ") + String(sensors.fsr3) + 
+    //           String(", ") + String(sensors.fsr4) + "\n\n";
+              
+
+    // uint8_t data[output.length() + 1]; // +1 for the null terminator
+    // output.getBytes(data, sizeof(data));
+    // esp_err_t result = esp_now_send(peerAddress, data, sizeof(data));
   }
-  delay(10);
+  delay(5);
 }
 
 void reset_inputs(){
@@ -257,7 +284,7 @@ void unpack_fsrVal(uint8_t* data)
   sensors.fsr3 = (data[5] << 8) | data[4];
   sensors.fsr4 = (data[7] << 8) | data[6];
   GRF_FSRs();
-  // Serial.print(sensors.fsr1); Serial.print(", "); Serial.print(sensors.fsr2); Serial.print(", "); Serial.print(sensors.fsr3); Serial.print(", "); Serial.print(sensors.fsr4); Serial.println("");
+  Serial.print(sensors.fsr1); Serial.print(", "); Serial.print(sensors.fsr2); Serial.print(", "); Serial.print(sensors.fsr3); Serial.print(", "); Serial.print(sensors.fsr4); Serial.println("");
 }
 
 
@@ -271,9 +298,9 @@ void Position_Control(float pRef, float Kp, float Kd, float feedforward){
 }
 
 void enter_deadband(){
-  while (abs(::p_out - 3) > 0.1)
+  while (abs(::p_out - 3) > 0.2)
   {
-    Position_Control(3, 20, 3, 0);
+    Position_Control(3, 12, 3, 0);
   }
   reset_inputs();
 }

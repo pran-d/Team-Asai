@@ -12,6 +12,8 @@ MPU6050 mpu;
 
 const char* ssid = "Redmi Note 9";
 const char* password = "arvind05";
+// const char* ssid = "NCAHT IITM";
+// const char* password = "Ncaht123$";
 WebServer server(80);
 bool stopFlag = true;
 bool formSubmitted = false;  // Flag to indicate form submission
@@ -142,6 +144,7 @@ float I_max_Ascent = 4.5; //Saturate Build up at this value
 int FSRdescentThreshLower = 70, FSRdescentThreshUpper = 300; 
 float theta_t_ascent = 35, theta_t_walking = 10;
 float imuHighVelThresh = 2, imuFlexionThresh = -2, imuStableAngle = 25;
+float descentDeadband = 1.5; float descentKp = 10;
 
 float region1 = 0.4, region2 = 1, region3 = 1.5;
 float k1 = 0.25, k2 = 0.5, k3 = 1;

@@ -77,6 +77,7 @@ void AscentStateMachine() {
 
 void DescentStateMachine() {
   server.handleClient();
+  // Serial.printf("%f, %f, %f, %f, %f \n", region1, region2, region3, k1, k2, k3);
   switch (::currentPhase) {
     case Sw:
     {
@@ -85,9 +86,9 @@ void DescentStateMachine() {
         currentPhase = MS; 
         Serial.println("********* Descent Sw -> MS *********");
       }
-      while(::p_out < 1.4)
+      while(::p_out < descentDeadband - 0.2)
       {
-        Position_Control(1.8, 5, 2, 0.1);
+        Position_Control(descentDeadband, descentKp, 2.2, 0);
       }
       reset_inputs();
       break;

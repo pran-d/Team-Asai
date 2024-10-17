@@ -11,9 +11,10 @@ void buttonSwitchState(int pressed){
   if(pressed==1)
   { 
     ::currentMode = Passive;
-    ::motor_active = 'a';
+    ::motor_active = 'p';
     reset_inputs();
     EnterMode(0x01);
+    enter_deadband();
     change_Indicator_LED(1);
     Serial.println("Motor mode entered");
     delay(300);
@@ -25,6 +26,7 @@ void buttonSwitchState(int pressed){
     ::currentPhase = Standing;
     ::motor_active = 'a';
     change_Indicator_LED(0);
+    digitalWrite(17, HIGH);
     delay(300);
   }
   else if(pressed==3)
