@@ -58,7 +58,8 @@ void setup() {
   int pressed = 0;
   while(pressed==0){
     pressed = checkMode();
-    server.handleClient();
+    if(wifi_mode==1)
+      server.handleClient();
   }
 
   Serial.println("Calibrating extended position...");

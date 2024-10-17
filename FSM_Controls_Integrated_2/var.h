@@ -10,8 +10,10 @@
 
 MPU6050 mpu;
 
-const char* ssid = "Redmi Note 9";
-const char* password = "arvind05";
+const char* ssid = "POCO PHONE";
+const char* password = "pranav123";
+// const char* ssid = "Redmi Note 9";
+// const char* password = "arvind05";
 // const char* ssid = "NCAHT IITM";
 // const char* password = "Ncaht123$";
 WebServer server(80);
@@ -148,6 +150,7 @@ float descentDeadband = 1.5; float descentKp = 10;
 
 float region1 = 0.4, region2 = 1, region3 = 1.5;
 float k1 = 0.25, k2 = 0.5, k3 = 1;
+float d1 = 0.025, d2 = 0.05, d3 = 0.1;
 
 float iRef = -4.5, iRef1= -2.0;
 // int rampTime1 = 100, rampTime2 = 175;

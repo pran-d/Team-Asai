@@ -284,7 +284,7 @@ void unpack_fsrVal(uint8_t* data)
   sensors.fsr3 = (data[5] << 8) | data[4];
   sensors.fsr4 = (data[7] << 8) | data[6];
   GRF_FSRs();
-  Serial.print(sensors.fsr1); Serial.print(", "); Serial.print(sensors.fsr2); Serial.print(", "); Serial.print(sensors.fsr3); Serial.print(", "); Serial.print(sensors.fsr4); Serial.println("");
+  // Serial.print(sensors.fsr1); Serial.print(", "); Serial.print(sensors.fsr2); Serial.print(", "); Serial.print(sensors.fsr3); Serial.print(", "); Serial.print(sensors.fsr4); Serial.println("");
 }
 
 
@@ -464,21 +464,21 @@ void descentController(){
   if (-::p_in + ::p_out > 0.05 && -::p_in + ::p_out < region1){
     ::kp_in = 0;
     ::kd_in = 0;
-    ::t_in = - k1 * (-::p_in + ::p_out) ;
+    ::t_in = - k1 * (-::p_in + ::p_out) - d1 * ::v_out;
     Serial.print("1 ");
   }
 
   else if (-::p_in + ::p_out > region1 && -::p_in + ::p_out < region2){
     ::kp_in = 0;
     ::kd_in = 0;
-    ::t_in = -0.3 - k2 * (-::p_in + ::p_out);
+    ::t_in = -0.3 - k2 * (-::p_in + ::p_out) - d2 * ::v_out;
     Serial.print("2 ");
   }
 
   else if (-::p_in + ::p_out > region2 && -::p_in + ::p_out < region3){
     ::kp_in = 0;
     ::kd_in = 0;
-    ::t_in = -0.3 - k3 * (-::p_in + ::p_out);
+    ::t_in = -0.3 - k3 * (-::p_in + ::p_out) - d3 * ::v_out;
     Serial.print("3 ");
   }
 

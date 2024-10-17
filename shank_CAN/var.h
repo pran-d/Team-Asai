@@ -15,7 +15,7 @@ const float ALPHA = 0.2; //lowpass filter constant
 const float alpha_imu = 0.98; //complementary filter const
 float shank=0;
 int lowPassValues[numFsrs] = {0, 0, 0, 0};
-int fsrOffsets[numFsrs] = {527, 522, 520, 520};//{494,496,495,494};//{530,577,582,574};
+int fsrOffsets[numFsrs] = {527, 522, 1320, 620};//{494,496,495,494};//{530,577,582,574};
 int mpuOffsets[6] = {664,	-156,	736, -276, -183, -144};
 int16_t gyroXOffset ;
 int16_t gyroYOffset ;
