@@ -72,4 +72,4 @@ volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin h
 
 //MPU6050 mpu6050(Wire);
 float angleX = 0;
-float angleY = 0;
+float angleY = 0, angleZ=0;

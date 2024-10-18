@@ -42,6 +42,9 @@ void loop() {
   Serial.print(send.fsr2);Serial.print("  ");
   Serial.print(send.fsr3);Serial.print("  ");
   Serial.print(send.fsr4);Serial.print("  ");
+  Serial.print(angleX);Serial.print("  ");
+  Serial.print(angleY);Serial.print("  ");
+  Serial.print(angleZ);Serial.print("  ");
   Serial.print("  , Gait Phase: ");
   Serial.println(gaitPhase);
 // delay(50);

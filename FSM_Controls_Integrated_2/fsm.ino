@@ -45,30 +45,47 @@ void WalkingStateMachine()
 
 void AscentStateMachine() {
   server.handleClient();
-  switch (currentPhase) {
-    case Sw:
+  switch (::currentMode){
+    case Stair:
     {
-      if (GRF > FSRascentThresh1 && sensors.thighAngle > theta_t_ascent)
-      {        
-        currentPhase = MS; currentState = Ascent; // Walking to Ascent
-      }
-      if (GRF > FSRascentThresh1 && sensors.thighAngle < theta_t_walking ) 
-      {
-        Serial.println("Ascent to Walking");        
-        currentPhase = Standing; 
-        currentState = Walking; // Ascent to Walking 
+      switch (::currentPhase) {
+        case Sw:
+        {
+          if (GRF > FSRascentThresh1 && sensors.thighAngle > theta_t_ascent)
+          {        
+            currentPhase = MS; currentState = Ascent; // Walking to Ascent
+          }
+          if (GRF > FSRascentThresh1 && sensors.thighAngle < theta_t_walking ) 
+          {
+            Serial.println("Ascent to Walking");        
+            currentPhase = Standing; 
+            currentState = Walking; // Ascent to Walking 
+          }
+          break;
+        }
+
+        case MS:
+        {
+          if(sensors.thighAngle > theta_t_ascent && GRF > FSRascentThresh2){
+            Serial.println("Start Climbing");
+            // Stair_Ascent_Loading();
+            Stair_Ascent_Loading_GUI();
+            Serial.println("Stair Ascent Finished");
+            enter_deadband();
+          }
+          break;
+        }
       }
       break;
     }
 
-    case MS:
+    case HighStep:
     {
       if(sensors.thighAngle > theta_t_ascent && GRF > FSRascentThresh2){
         Serial.println("Start Climbing");
         // Stair_Ascent_Loading();
         Stair_Ascent_Loading_GUI();
         Serial.println("Stair Ascent Finished");
-        enter_deadband();
       }
       break;
     }
@@ -81,14 +98,25 @@ void DescentStateMachine() {
   switch (::currentPhase) {
     case Sw:
     {
+      if (::currentMode == HighStep && GRF > FSRascentThresh1 && sensors.thighAngle > theta_t_ascent)
+      {
+        Serial.println("Sw -> MS and Stair Descent -> Ascent");        
+        currentPhase = MS; 
+        currentState = Ascent;
+      }
+      
       if (GRF > FSRdescentThreshUpper)
       {        
         currentPhase = MS; 
         Serial.println("********* Descent Sw -> MS *********");
       }
-      while(::p_out < descentDeadband - 0.2)
+      
+      if(sensors.thighAngle<30)
       {
-        Position_Control(descentDeadband, descentKp, 2.2, 0);
+        while(::p_out < descentDeadband - 0.2)
+        {
+          Position_Control(descentDeadband, descentKp, 2.2, 0);
+        }
       }
       reset_inputs();
       break;
@@ -99,6 +127,12 @@ void DescentStateMachine() {
       if(GRF < FSRdescentThreshLower){
         currentPhase = Sw;
         Serial.println("********* Descent MS -> Sw *********");
+      }
+      if (::currentMode == HighStep && GRF > FSRascentThresh1 && sensors.thighAngle > theta_t_ascent)
+      {
+        Serial.println("MS -> MS and Stair Descent -> Ascent");        
+        currentPhase = MS; 
+        currentState = Ascent;
       }
       descentController();
       break;

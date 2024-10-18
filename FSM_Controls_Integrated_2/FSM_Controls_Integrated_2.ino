@@ -25,7 +25,7 @@ void setup() {
   EnterMode(0x01);
   delay(1000);
 
-  int wifi_mode=1;
+  int wifi_mode=0;
 
   if (wifi_mode==1){
 
@@ -94,6 +94,8 @@ void loop(){
   {
     pressed = checkMode();
     buttonSwitchState(pressed);
+    do_each_loop('m');
+    server.handleClient();
   }
 
   if (::currentMode==Stair)
@@ -103,7 +105,7 @@ void loop(){
     IMU_update();
     CAN_receive();
     
-    // esp_err_t result = esp_now_send(peerAddress, (uint8_t *)&sensors, sizeof(sensors));
+  //   // esp_err_t result = esp_now_send(peerAddress, (uint8_t *)&sensors, sizeof(sensors));
     switch (::currentState) {
 
       case Walking:
@@ -120,5 +122,26 @@ void loop(){
 
     }
   }
+
+  if (::currentMode==HighStep)
+  {
+    pressed = checkMode();
+    buttonSwitchState(pressed);
+    IMU_update();
+    CAN_receive();
+    
+    // esp_err_t result = esp_now_send(peerAddress, (uint8_t *)&sensors, sizeof(sensors));
+    switch (::currentState) {
   
+      case Ascent:
+      AscentStateMachine();
+      break;
+
+      case Descent:
+      DescentStateMachine();
+      break;
+
+    }
+
+  }
 }

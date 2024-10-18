@@ -1,4 +1,11 @@
 void constrain_inputs(){
+  if(abs(::t_out)>2 && abs(::t_in)<0.00001 && ::kp_in==0 && ::kd_in==0)
+  {
+    Serial.println("Motor glitch");
+    Serial.println(::t_out);
+    // setVelocity(0);
+    ExitMode(0x01);
+  }
   ::t_in = constrain(::t_in, -6, 6);
 }
 
@@ -23,7 +30,7 @@ void do_each_loop(char fromWhere) {
   //   ERROR_STATE = 0;
   // }
 
-  if (counter == 10) {
+  if (counter == 1) {
     Serial.printf("\n %c, t_out: %0.4f, t_in: %0.4f, p_in: %.4f, p_out: %.4f, v_in: %.4f, v_out: %.4f, kp_in: %.4f, kd_in: %.4f \n", fromWhere, t_out, t_in, p_in, p_out, v_in, v_out, kp_in, kd_in);
     Serial.printf("thigh_angle: %.2f, shank_angle: %.2f, knee_angle: %.2f \n", sensors.thighAngle, sensors.shankAngle, sensors.kneeAngle);
     Serial.printf("GRF: %d,  %d,  %d, %d \n\n", sensors.fsr1, sensors.fsr2, sensors.fsr3, sensors.fsr4);
@@ -301,6 +308,11 @@ void enter_deadband(){
   while (abs(::p_out - 3) > 0.2)
   {
     Position_Control(3, 12, 3, 0);
+    int pressed = checkMode();
+    if(pressed!=0){
+      buttonSwitchState(pressed);
+      break;
+    }
   }
   reset_inputs();
 }
@@ -329,11 +341,18 @@ void Stair_Ascent_Loading_GUI(){
     
   }
 
-  currentPhase = Standing;
-  currentState = Walking;
   reset_inputs();
-  do_each_loop('s');     
 
+  if(::currentMode==Stair)
+  {
+    ::currentPhase = Standing;
+    ::currentState = Walking;
+  }
+  if(::currentMode==HighStep)
+  {
+    ::currentState = Descent;
+    ::currentPhase = Sw;
+  }
 }
 
 void Stair_Ascent_Loading()

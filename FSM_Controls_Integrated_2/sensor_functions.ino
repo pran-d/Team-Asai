@@ -11,11 +11,12 @@ void buttonSwitchState(int pressed){
   if(pressed==1)
   { 
     ::currentMode = Passive;
-    ::motor_active = 'p';
+    ::motor_active = 'a';
     reset_inputs();
     EnterMode(0x01);
     enter_deadband();
     change_Indicator_LED(1);
+    reset_inputs();
     Serial.println("Motor mode entered");
     delay(300);
   }
@@ -33,6 +34,15 @@ void buttonSwitchState(int pressed){
   {
     reset_inputs();
     Serial.println("************ Descent state entered ************");
+    while (abs(::p_out - descentDeadband) > 0.2)
+    {
+      int pressed = checkMode();
+      if(pressed!=0){
+        buttonSwitchState(pressed);
+        break;
+      }
+      Position_Control(descentDeadband, descentKp, 2.2, 0);
+    }
     ::currentMode = Stair;
     ::currentState = Descent;
     ::currentPhase = Sw;
@@ -42,11 +52,14 @@ void buttonSwitchState(int pressed){
   }
   else if(pressed==4)
   {
-    ::motor_active = 'p';
-    change_Indicator_LED(3);
     reset_inputs();
-    Serial.println("Motor mode exited");
-    ExitMode(0x01);
+    ::currentMode = HighStep;
+    ::currentState = Descent;
+    ::currentPhase = Sw;
+    ::motor_active = 'a';
+    change_Indicator_LED(3);
+    // Serial.println("Motor mode exited");
+    // ExitMode(0x01);
     delay(300);
   }
 }
@@ -148,8 +161,10 @@ void IMU_update()
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
       mpu.dmpGetGyro(&av, fifoBuffer); 
   }
-  angleX= ypr[2] * 180/M_PI - 96;
-  // angleXdot = av.x;
-  sensors.thighAngle= angleX;
-  sensors.kneeAngle= angleX-sensors.shankAngle;
+  angleX= ypr[0] * 180/M_PI;
+  angleY= ypr[1] * 180/M_PI;
+  angleZ= ypr[2] * 180/M_PI;
+  sensors.thighAngle = angleZ - 96;
+  sensors.kneeAngle = sensors.thighAngle + sensors.shankAngle;
+  // Serial.print(angleX); Serial.print(", "); Serial.print(angleY); Serial.print(", "); Serial.print(angleZ); Serial.println("");
 }

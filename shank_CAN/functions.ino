@@ -54,6 +54,7 @@ void IMU_update(){
   }
   angleX=ypr[2] * 180/M_PI;
   angleY=ypr[1] * 180/M_PI;
+  angleZ=ypr[0] * 180/M_PI;
   currentTime = millis();
 }
 

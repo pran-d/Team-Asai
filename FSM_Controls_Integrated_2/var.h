@@ -38,7 +38,7 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 
 //MPU6050 mpu6050(Wire);
-float angleX = 0;
+float angleX = 0, angleY = 0, angleZ=0;
 float angleXdot = 0;
 float alpha = 0.02;  // Complementary filter constant
 unsigned long previousTime, currentTime, startTime, lastMessageTime;
@@ -101,8 +101,8 @@ enum States {Ascent, Descent, Walking};
 States currentState = Walking;
 enum Phases {Standing, HS, MS, TO, Sw};
 Phases currentPhase = Standing;
-enum Modes {Passive, Stair};
-Modes currentMode = Stair;
+enum Modes {Passive, Stair, HighStep};
+Modes currentMode = Passive;
 
 float theta_t; // Thigh angle
 float theta_k; // Knee angle
